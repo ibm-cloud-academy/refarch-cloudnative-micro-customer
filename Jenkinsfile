@@ -8,7 +8,7 @@ podTemplate(
 
     containers: [
         containerTemplate(name: 'gradle', image: 'ibmcase/gradle:jdk8-alpine', ttyEnabled: true, command: 'cat'),
-        containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'kubectl', image: 'ibmcloudacademy/k8s-icp:v1.0', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'docker' , image: 'docker:17.06.1-ce', ttyEnabled: true, command: 'cat')
     ],
 ) {
@@ -57,19 +57,15 @@ podTemplate(
                 set +e
                 NAMESPACE=`cat /var/run/configs/registry-config/namespace`
                 REGISTRY=`cat /var/run/configs/registry-config/registry`
-                DEPLOYMENT=`kubectl --namespace=\${NAMESPACE} get deployments -l app=bluecompute,tier=backend,micro=customer -o name`
-
-                kubectl --namespace=\${NAMESPACE} get \${DEPLOYMENT}
-
-                if [ \${?} -ne "0" ]; then
-                    # No deployment to update
-                    echo 'No deployment to update'
-                    exit 1
-                fi
-
-                # Update Deployment
-                kubectl --namespace=\${NAMESPACE} set image \${DEPLOYMENT} customer=\${REGISTRY}/\${NAMESPACE}/bluecompute-customer:${env.BUILD_NUMBER}
-                kubectl --namespace=\${NAMESPACE} rollout status \${DEPLOYMENT}
+                DOCKER_USER=`cat /var/run/secrets/registry-account/username`
+                DOCKER_PASSWORD=`cat /var/run/secrets/registry-account/password`
+                wget --no-check-certificate https://10.10.1.10:8443/api/cli/icp-linux-amd64
+                bx plugin install icp-linux-amd64
+                bx pr login -a https://10.10.1.10:8443 --skip-ssl-validation -u \${DOCKER_USER} -p \${DOCKER_PASSWORD} -c id-cloudcluster-account
+                bx pr cluster-config cloudcluster
+                
+                helm repo add bluecompute https://raw.githubusercontent.com/ibm-cloud-academy/icp-jenkins-helm-bluecompute/master/charts
+                helm install --tls -n bluecompute-customer --set image.repository=\${REGISTRY}/\${NAMESPACE}/bluecompute-customer --set image.tag=\${env.BUILD_NUMBER} customer
                 """
             }
         }
