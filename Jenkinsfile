@@ -65,7 +65,7 @@ podTemplate(
                 bx pr cluster-config cloudcluster
                 helm init --client-only
                 helm repo add bluecompute https://raw.githubusercontent.com/ibm-cloud-academy/icp-jenkins-helm-bluecompute/master/charts
-                helm install --tls -n bluecompute-customer --set image.repository=\${REGISTRY}/\${NAMESPACE}/bluecompute-customer --set image.tag=\${env.BUILD_NUMBER} customer
+                helm install --tls -n bluecompute-customer --set image.repository=\${REGISTRY}/\${NAMESPACE}/bluecompute-customer --set image.tag=${env.BUILD_NUMBER} customer
                 """
             }
         }
