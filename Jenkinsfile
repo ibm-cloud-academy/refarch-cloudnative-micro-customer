@@ -8,10 +8,11 @@ podTemplate(
 
     containers: [
         containerTemplate(name: 'gradle', image: 'ibmcase/gradle:jdk8-alpine', ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'kubectl', image: 'ibmcloudacademy/k8s-icp:v1.0', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'docker' , image: 'docker:17.06.1-ce', ttyEnabled: true, command: 'cat')
     ],
 ) {
-    node ('mypod') {
+    node ('gradlePod') {
         checkout scm
         container('gradle') {
             stage('Build Gradle Project') {
