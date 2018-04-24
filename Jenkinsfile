@@ -1,5 +1,5 @@
 podTemplate(
-    label: 'mypod',
+    label: 'gradlePod',
     volumes: [
       hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
       secretVolume(secretName: 'registry-account', mountPath: '/var/run/secrets/registry-account'),
